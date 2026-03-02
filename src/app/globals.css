@@ -7,34 +7,48 @@ body {
   margin: 0; padding: 0;
   font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto;
   background: url('/RockyMountains.jpg') center/cover no-repeat fixed;
-  color: #1e293b; /* darker text for contrast on blue */
+  color: #1e293b; 
 }
 
-/* Glass panel - light blue tint */
+/* Base Glass panel */
 .glass {
-  background: rgba(173, 216, 230, 0.45);
+  background: rgba(173, 216, 230, 0.45) !important;
   border: 1px solid rgba(135, 206, 250, 0.55);
   border-radius: 16px;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   padding: 1rem;
   box-shadow: 0 8px 28px rgba(0,0,0,0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  /* Ensure transform transition works properly */
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, box-shadow;
+  display: block; /* Helps with layout transforms */
 }
 
-/* Hover effect */
-.glass:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 36px rgba(0,0,0,0.25);
-  background: rgba(173, 216, 230, 0.55); /* slightly more opaque on hover */
+/* Ensure ALL glass panels have a visible hover state */
+.glass:hover,
+div.glass:hover,
+section.glass:hover,
+article.glass:hover {
+  transform: translateY(-8px) scale(1.01) !important;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.3) !important;
+  background: rgba(173, 216, 230, 0.6) !important;
 }
 
 .site-header { text-align: center; color: white; padding: 2rem 0; text-shadow: 0 2px 4px rgba(0,0,0,0.4); }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1.5rem; padding: 1rem 0; margin-top: 1.5rem; }
 
+.card { cursor: pointer; } /* Show pointer to indicate interactable */
 .card h3 { margin: 0 0 0.5rem 0; }
 .card p { margin: 0 0 1rem 0; opacity: 0.9; }
-.card a { display: inline-block; padding: 0.5rem 1rem; background: rgba(255,255,255,0.4); border-radius: 8px; text-decoration: none; color: #1e293b; font-weight: 600; transition: background 0.2s; }
-.card a:hover { background: rgba(255,255,255,0.6); }
+
+/* Keep button hover internal to card */
+.card-btn { 
+  display: inline-block; padding: 0.5rem 1rem; 
+  background: rgba(255,255,255,0.5); border-radius: 8px; 
+  text-decoration: none; color: #1e293b; font-weight: 600; 
+  transition: background 0.2s; 
+}
+.card-btn:hover { background: rgba(255,255,255,0.8); }
 
 @media (max-width: 700px){ .grid { grid-template-columns: 1fr; } }
