@@ -1,11 +1,11 @@
 export default function Home(){
   return (
     <section style={{ padding: '2rem' }}>
-      <div className="glass" style={{ padding: '2rem', borderRadius: 16, textAlign:'center', background:'rgba(255,255,255,.75)' }}>
+      <div className="glass" style={{ padding: '2rem', textAlign:'center' }}>
         <h2 style={{ margin:0, fontSize:'2rem' }}>Welcome to AIFinTech</h2>
         <p style={{ marginTop:6, fontSize:'1.05rem' }}>Glassmorphism, dawn Rockies background, risk, valuation, and regtech demos.</p>
       </div>
-      <div className="grid" style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(260px, 1fr))', gap: '1rem', marginTop: '1rem' }}>
+      <div className="grid">
         <div className="glass card" style={{ padding:20 }}>
           <h3>Risk</h3>
           <p>Risk management overview, VaR, SA/CCR, CVA, etc.</p>
