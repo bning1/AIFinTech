@@ -1,0 +1,41 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>AIFinTech Trading Schema Design</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body{font-family:Arial, Helvetica, sans-serif; padding:20px; background:#fff; color:#111}
+    h1{color:#0b4bdc}
+    .card{border:1px solid #ddd; padding:12px; border-radius:8px; margin:8px 0;}
+    pre{background:#f5f5f5; padding:12px; overflow:auto; border-radius:6px; border:1px solid #e0e0e0}
+  </style>
+</head>
+<body>
+  <h1>AIFinTech Trading Schema Design</h1>
+  <p>High-level PostgreSQL schema to support capital markets trades, instruments, portfolios, and CCR/margining.</p>
+  <div class="card">
+    <h2>Scope</h2>
+    <ul>
+      <li>Master instrument with per-asset sub-tables</li>
+      <li>Trades, positions, and portfolios</li>
+      <li>Counterparty data and CCR/margin handling</li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>Core Tables (high level)</h2>
+    <ul>
+      <li><b>party</b> (counterparties, internal desks)</li>
+      <li><b>portfolio</b></li>
+      <li><b>instrument</b> / <b>instrument_bond</b> / <b>instrument_equity</b></li>
+      <li><b>trade</b> / <b>trade_leg_swap</b> / <b>trade_option_details</b></li>
+      <li><b>margin_agreement</b></li>
+    </ul>
+  </div>
+  <div class="card">
+    <h2>Full DDL</h2>
+    <p>See <code>ddl/schema.sql</code> for the full create-table script.</p>
+  </div>
+</body>
+</html>
+HTML'
