@@ -1,4 +1,4 @@
-// Prisma schema for AIFinTech Trading System
+// Full multi-asset Prisma schema for AIFinTech Trading System
 
 generator client {
   provider = "prisma-client-js"
@@ -9,9 +9,157 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Bond {
-  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  issuer    String
-  coupon    Float
-  maturity  String
+// ==========================================
+// 1. Reference Data: Parties & Portfolios
+// ==========================================
+
+model party {
+  party_id     String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  party_name   String    @db.VarChar(255)
+  party_type   String    @db.VarChar(50) // Internal Desk, Counterparty, ClearingHouse
+  lei          String?   @db.VarChar(20)
+  country      String?   @db.VarChar(2)
+  is_active    Boolean   @default(true)
+  created_at   DateTime  @default(now()) @db.Timestamptz(6)
+
+  // Relations
+  portfolios   portfolio[]
+  trades_desk  trade[]   @relation("TradingDesk")
+  trades_cp    trade[]   @relation("Counterparty")
+  issued_bonds instrument_bond[] @relation("BondIssuer")
+}
+
+model portfolio {
+  portfolio_id   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  portfolio_name String   @db.VarChar(255)
+  currency       String   @db.VarChar(3)
+  created_at     DateTime @default(now()) @db.Timestamptz(6)
+  
+  desk_id        String?  @db.Uuid
+  desk           party?   @relation(fields: [desk_id], references: [party_id])
+
+  trades         trade[]
+}
+
+// ==========================================
+// 2. Master Instrument Definition 
+// ==========================================
+
+model instrument {
+  instrument_id   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  asset_class     String    @db.VarChar(50) // FixedIncome, Rates, Equity, FX, Commodity, Credit
+  instrument_type String    @db.VarChar(50) // Bond, IRSwap, CapFloor, Equity, FXSpot, etc.
+  ticker_symbol   String?   @db.VarChar(50)
+  isin            String?   @db.VarChar(12)
+  currency        String    @db.VarChar(3)
+  issue_date      DateTime? @db.Date
+  maturity_date   DateTime? @db.Date
+  multiplier      Decimal   @default(1.0) @db.Decimal(15, 6)
+  created_at      DateTime  @default(now()) @db.Timestamptz(6)
+
+  // Sub-type Extensions (One-to-One)
+  bond_details    instrument_bond?
+  equity_details  instrument_equity?
+  
+  trades          trade[]
+}
+
+model instrument_bond {
+  instrument_id        String       @id @db.Uuid
+  issuer_id            String?      @db.Uuid
+  bond_type            String?      @db.VarChar(50) // Treasury, Corporate, Provincial
+  coupon_rate          Decimal?     @db.Decimal(10, 6)
+  coupon_frequency     String?      @db.VarChar(20) // e.g. "Semi-Annual"
+  day_count_convention String?      @db.VarChar(20) // e.g. "ACT/360", "30/360"
+  seniority            String?      @db.VarChar(50)
+
+  instrument           instrument   @relation(fields: [instrument_id], references: [instrument_id], onDelete: Cascade)
+  issuer               party?       @relation("BondIssuer", fields: [issuer_id], references: [party_id])
+}
+
+model instrument_equity {
+  instrument_id        String       @id @db.Uuid
+  exchange             String?      @db.VarChar(50)
+  sector               String?      @db.VarChar(100)
+
+  instrument           instrument   @relation(fields: [instrument_id], references: [instrument_id], onDelete: Cascade)
+}
+
+// ==========================================
+// 3. Trade and Position Records
+// ==========================================
+
+model trade {
+  trade_id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  
+  instrument_id     String    @db.Uuid
+  instrument        instrument @relation(fields: [instrument_id], references: [instrument_id])
+  
+  portfolio_id      String    @db.Uuid
+  portfolio         portfolio @relation(fields: [portfolio_id], references: [portfolio_id])
+  
+  desk_id           String?   @db.Uuid
+  desk              party?    @relation("TradingDesk", fields: [desk_id], references: [party_id])
+
+  counterparty_id   String    @db.Uuid
+  counterparty      party     @relation("Counterparty", fields: [counterparty_id], references: [party_id])
+  
+  trade_date        DateTime  @db.Date
+  settlement_date   DateTime? @db.Date
+  buy_sell          String    @db.VarChar(4) // Buy, Sell
+  quantity          Decimal   @db.Decimal(20, 6) // Face Value / Shares / Exact Notional
+  price             Decimal   @db.Decimal(20, 6) // Execution price or Rate
+  trade_currency    String?   @db.VarChar(3)
+  
+  status            String?   @default("Booked") @db.VarChar(20)
+  
+  created_at        DateTime  @default(now()) @db.Timestamptz(6)
+  updated_at        DateTime  @default(now()) @db.Timestamptz(6)
+
+  // Derivative Extensions (One-to-Many legs, One-to-One options)
+  swap_legs         trade_leg_swap[]
+  option_details    trade_option_details?
+}
+
+model trade_leg_swap {
+  leg_id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  trade_id             String    @db.Uuid
+  leg_type             String    @db.VarChar(10) // Pay, Receive
+  leg_currency         String    @db.VarChar(3)
+  rate_type            String    @db.VarChar(10) // Fixed, Float
+  fixed_rate           Decimal?  @db.Decimal(10, 6)
+  float_index          String?   @db.VarChar(50) // e.g., SOFR, EURIBOR
+  spread               Decimal?  @db.Decimal(10, 6)
+  payment_frequency    String?   @db.VarChar(20)
+  day_count_convention String?   @db.VarChar(20)
+  notional             Decimal   @db.Decimal(25, 2)
+
+  trade                trade     @relation(fields: [trade_id], references: [trade_id], onDelete: Cascade)
+}
+
+model trade_option_details {
+  trade_id             String    @id @db.Uuid
+  option_style         String?   @db.VarChar(20) // European, American, Bermudan
+  call_put             String?   @db.VarChar(4)  // Call, Put
+  strike_price         Decimal?  @db.Decimal(25, 6)
+  expiration_date      DateTime? @db.Date
+  settlement_type      String?   @db.VarChar(20) // Physical, Cash
+
+  trade                trade     @relation(fields: [trade_id], references: [trade_id], onDelete: Cascade)
+}
+
+// ==========================================
+// 4. CCR & Margining (Basic)
+// ==========================================
+
+model margin_agreement {
+  agreement_id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  internal_party_id       String?   @db.Uuid
+  counterparty_id         String?   @db.Uuid
+  agreement_type          String?   @db.VarChar(50) // ISDA, CSA, GMRA
+  base_currency           String?   @db.VarChar(3)
+  threshold_amount        Decimal?  @db.Decimal(25, 2)
+  minimum_transfer_amount Decimal?  @db.Decimal(25, 2)
+  independent_amount      Decimal?  @db.Decimal(25, 2)
+  created_at              DateTime  @default(now()) @db.Timestamptz(6)
 }
