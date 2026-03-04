@@ -1,0 +1,17 @@
+// Prisma schema for AIFinTech Trading System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Bond {
+  id        String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  issuer    String
+  coupon    Float
+  maturity  String
+}
