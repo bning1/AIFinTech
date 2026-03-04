@@ -1,6 +1,16 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 
 export default function BondEntryForm() {
+  const [booked, setBooked] = useState(false);
+
+  const handleBook = () => {
+    // In a real app, this would dispatch to an API or store
+    console.log("Trade booked for Bond");
+    setBooked(true);
+    setTimeout(() => setBooked(false), 3000);
+  };
+
   return (
     <form className="glass" style={{ padding: "2rem", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
       {/* Trade Info */}
@@ -64,12 +74,17 @@ export default function BondEntryForm() {
         <input type="date" defaultValue="2035-12-31" style={{ width: "100%", padding: "0.6rem", borderRadius: "8px", border: "1px solid rgba(255,255,255,0.4)", background: "rgba(255,255,255,0.8)" }} />
       </div>
       
-      {/* Submit */}
-      <div style={{ gridColumn: "1 / -1", textAlign: "right", marginTop: "1.5rem" }}>
-        <a href="/" style={{ marginRight: "1rem", padding: "0.8rem 2rem", fontSize: "1.1rem", textDecoration: "none", color: "#1e293b" }}>Cancel</a>
-        <button type="button" className="card-btn" style={{ padding: "0.8rem 2rem", fontSize: "1.1rem", cursor: "pointer", border: "none" }} onClick={() => alert("Trade Booked!")}>
-          Book Trade
-        </button>
+      {/* Submit / Feedback */}
+      <div style={{ gridColumn: "1 / -1", display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: "1.5rem" }}>
+        <div>
+          {booked && <span style={{ color: "green", fontWeight: "bold", background: "rgba(255,255,255,0.8)", padding: "0.5rem 1rem", borderRadius: "8px" }}>✅ Trade successfully booked!</span>}
+        </div>
+        <div>
+          <a href="/" style={{ marginRight: "1.5rem", fontSize: "1.1rem", textDecoration: "none", color: "#1e293b", fontWeight: "bold" }}>Cancel</a>
+          <button type="button" className="card-btn" style={{ padding: "0.8rem 2rem", fontSize: "1.1rem", cursor: "pointer", border: "none" }} onClick={handleBook}>
+            Book Trade
+          </button>
+        </div>
       </div>
     </form>
   );
