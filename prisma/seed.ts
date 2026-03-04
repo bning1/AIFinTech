@@ -2,7 +2,7 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log("Starting seed...");
+  console.log("Starting full multi-asset seed...");
 
   // 1. Create Internal Party (Trading Desk)
   const internalParty = await prisma.party.create({
@@ -31,7 +31,7 @@ async function main() {
     }
   });
 
-  // 4. Create an Instrument (Base + Bond extension)
+  // 4. Create a Bond Instrument
   const bondInst = await prisma.instrument.create({
     data: {
       asset_class: "FixedIncome",
@@ -46,10 +46,20 @@ async function main() {
           bond_type: "Treasury",
           coupon_rate: 3.50,
           coupon_frequency: "SEMI_ANNUAL",
-          day_count_convention: "ACT/ACT",
-          issuer_id: internalParty.party_id // Treating US Treasury as an internal/system entity for seed simplicity
+          day_count_convention: "ACT/ACT"
         }
       }
+    }
+  });
+
+  // 5. Create an IR Swap Instrument
+  const swapInst = await prisma.instrument.create({
+    data: {
+      asset_class: "Rates",
+      instrument_type: "IRSwap",
+      ticker_symbol: "USD-SOFR-5Y",
+      currency: "USD",
+      maturity_date: new Date("2031-01-01")
     }
   });
 
@@ -57,7 +67,10 @@ async function main() {
   console.log(`Internal Desk ID: ${internalParty.party_id}`);
   console.log(`Counterparty ID: ${cpParty.party_id}`);
   console.log(`Portfolio ID: ${portfolio.portfolio_id}`);
-  console.log(`Instrument ID: ${bondInst.instrument_id}`);
+  console.log(`Bond ID: ${bondInst.instrument_id}`);
+  console.log(`Swap ID: ${swapInst.instrument_id}`);
+  
+  console.log("\nUpdate your `/src/app/api/trades/bond/route.ts` hardcoded UUIDs with these if testing the UI -> DB flow directly!");
 }
 
 main()
