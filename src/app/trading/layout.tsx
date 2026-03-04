@@ -1,6 +1,5 @@
 import React from "react";
 import Link from "next/link";
-import "../globals.css";
 
 const ProductGroups = [
   { group: "Interest Rate (IR)", types: [{ name: "Bond", path: "/trading/bond" }, { name: "IR Swap", path: "/trading/ir-swap" }, { name: "Cap/Floor", path: "/trading/cap-floor" }, { name: "Swaption", path: "/trading/swaption" }] },
@@ -16,13 +15,13 @@ export default function TradingLayout({ children }: { children: React.ReactNode 
       {/* Left Sidebar: Product List */}
       <aside className="glass" style={{ width: "300px", padding: "1.5rem", alignSelf: "flex-start" }}>
         <div style={{ marginBottom: "1.5rem", borderBottom: "1px solid rgba(255,255,255,0.4)", paddingBottom: "0.5rem" }}>
-          <h2 style={{ margin: 0, fontSize: "1.5rem", color: "#1e293b" }}>Trading Portal</h2>
+          <h2 style={{ margin: 0, fontSize: "1.5rem", color: "#1e293b", textShadow: "none" }}>Trading Portal</h2>
           <Link href="/" style={{ fontSize: "0.9rem", color: "#2563eb", textDecoration: "none" }}>← Back to Main</Link>
         </div>
         
         {ProductGroups.map((pg, idx) => (
           <div key={idx} style={{ marginBottom: "1.5rem" }}>
-            <h3 style={{ fontSize: "1.1rem", color: "#1e293b", margin: "0 0 0.5rem 0", fontWeight: "bold" }}>
+            <h3 style={{ fontSize: "1.1rem", color: "#1e293b", textShadow: "none", margin: "0 0 0.5rem 0", fontWeight: "bold" }}>
               {pg.group}
             </h3>
             <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "4px" }}>
@@ -36,9 +35,9 @@ export default function TradingLayout({ children }: { children: React.ReactNode 
                        borderRadius: "8px", 
                        color: "#1e293b",
                        textDecoration: "none",
+                       background: "rgba(255,255,255,0.2)",
                        transition: "background 0.2s"
                     }}
-                    className="hover:bg-white/40"
                   >
                     {t.name}
                   </Link>
