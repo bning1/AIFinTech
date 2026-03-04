@@ -9,7 +9,7 @@ export default function Home(){
         <div className="glass card" style={{ padding:20 }}>
           <h3>Trading Desk</h3>
           <p>Book trades across multi-asset classes. Real-time pricing and execution simulator.</p>
-          <a href="#trading" className="card-btn">Enter Portal</a>
+          <a href="/trading" className="card-btn">Enter Portal</a>
         </div>
         <div className="glass card" style={{ padding:20 }}>
           <h3>Risk</h3>
